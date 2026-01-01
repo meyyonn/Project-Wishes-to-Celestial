@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question 1 | Celestial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #c3a6ff;
+      --bg: #0f0c29;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.15);
+    }
+
+    body {
+      margin: 0; font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white; height: 100vh; display: flex;
+      justify-content: center; align-items: center; overflow: hidden;
+    }
+
+    .stars {
+      position: absolute; width: 100%; height: 100%;
+      background: url('https://www.transparenttextures.com/patterns/stardust.png');
+      opacity: 0.3; z-index: 1; pointer-events: none;
+    }
+
+    .card {
+      background: var(--glass); backdrop-filter: blur(20px);
+      padding: 40px; border-radius: 40px; border: 1px solid var(--glass-border);
+      text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      width: 90%; max-width: 500px; z-index: 2;
+    }
+
+    .typewriter-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; margin-bottom: 30px;
+      line-height: 1.4; min-height: 80px; color: var(--accent);
+    }
+
+    input {
+      width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border); border-radius: 15px;
+      color: white; font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem; outline: none; transition: 0.3s;
+      box-sizing: border-box; opacity: 0; transform: translateY(10px);
+    }
+
+    input.visible { opacity: 1; transform: translateY(0); }
+
+    input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.05); }
+
+    button {
+      width: 100%; padding: 16px; border: none; border-radius: 15px;
+      background: var(--accent); color: #0f0c29; font-weight: 600;
+      font-size: 1.1rem; cursor: pointer; transition: 0.3s; margin-top: 20px;
+      opacity: 0; pointer-events: none;
+    }
+
+    button.visible { opacity: 1; pointer-events: auto; }
+
+    button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(195, 166, 255, 0.4); }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+
+  <div class="card">
+    <div class="typewriter-text" id="question"></div>
+    
+    <input type="text" id="answerInput" placeholder="Type your answer here..." autocomplete="off">
+    <button id="nextBtn" onclick="submitStep1()">Next Question</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const questionStr = "First of all, what has been the best part of your week so far?";
+    const visitorName = localStorage.getItem('visitorName') || "Visitor";
+    const qEl = document.getElementById("question");
+    const inputEl = document.getElementById("answerInput");
+    const btnEl = document.getElementById("nextBtn");
+
+    let i = 0;
+    function typeWriter() {
+      if (i < questionStr.length) {
+        qEl.innerHTML += questionStr.charAt(i);
+        i++;
+        setTimeout(typeWriter, 50);
+      } else {
+        // Show input and button after typing finishes
+        inputEl.classList.add("visible");
+        btnEl.classList.add("visible");
+      }
+    }
+
+    window.submitStep1 = async function() {
+      const answer = inputEl.value.trim();
+      if (answer === "") return alert("Please share something with the stars.");
+
+      try {
+        // We use 'update' with the visitorName as a key so all their answers stay together
+        const userRef = ref(db, 'results/' + visitorName);
+        await update(userRef, {
+          question1: answer,
+          timestamp: new Date().toLocaleString()
+        });
+
+        window.location.href = "question2.html";
+      } catch (e) {
+        alert("Connection error. Try again.");
+      }
+    }
+
+    window.onload = typeWriter;
+  </script>
+</body>
+</html>

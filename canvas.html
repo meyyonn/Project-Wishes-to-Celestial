@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Canvas | Celestial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #c3a6ff;
+      --bg: #0f0c29;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.15);
+    }
+
+    body {
+      margin: 0; font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white; min-height: 100vh; display: flex;
+      justify-content: center; align-items: center; padding: 20px;
+    }
+
+    .stars {
+      position: absolute; top:0; left:0; width: 100%; height: 100%;
+      background: url('https://www.transparenttextures.com/patterns/stardust.png');
+      opacity: 0.3; z-index: 1; pointer-events: none;
+    }
+
+    .card {
+      background: var(--glass); backdrop-filter: blur(20px);
+      padding: 50px; border-radius: 40px; border: 1px solid var(--glass-border);
+      text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      width: 100%; max-width: 700px; z-index: 2; animation: fadeIn 1.5s ease-out;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; margin-bottom: 10px; color: var(--accent);
+    }
+
+    p { opacity: 0.6; font-weight: 300; margin-bottom: 30px; }
+
+    /* The Auto-Expanding Blank Space */
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px dashed var(--glass-border);
+      border-radius: 25px;
+      padding: 30px;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      line-height: 1.8;
+      outline: none;
+      resize: none;
+      transition: 0.4s;
+      box-sizing: border-box;
+      overflow: hidden; /* Important for auto-grow */
+    }
+
+    textarea:focus {
+      border: 1px solid var(--accent);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 30px rgba(195, 166, 255, 0.1);
+    }
+
+    textarea::placeholder { color: rgba(255, 255, 255, 0.2); }
+
+    .btn-container { margin-top: 30px; }
+
+    button {
+      padding: 15px 50px; border: none; border-radius: 50px;
+      background: var(--accent); color: #0f0c29; font-weight: 600;
+      font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(195, 166, 255, 0.4);
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+
+  <div class="card">
+    <h1 id="userTitle">Your Final Space</h1>
+    <p>Feel free to write anything here. You can adjust and refine until it feels right.</p>
+    
+    <textarea 
+      id="canvasInput" 
+      placeholder="Type your heart out..." 
+      oninput="autoGrow(this)"></textarea>
+
+    <div class="btn-container">
+      <button onclick="finishJourney()">Send to the Stars</button>
+    </div>
+  </div>
+
+  <script>
+    // Pull name from login
+    const userName = localStorage.getItem('visitorName') || "Visitor";
+    document.getElementById('userTitle').innerText = `${userName}'s Canvas`;
+
+    // The logic to make the space grow as she types
+    function autoGrow(element) {
+      element.style.height = "200px"; // Reset to min height
+      element.style.height = (element.scrollHeight) + "px";
+    }
+
+    function finishJourney() {
+      const finalMsg = document.getElementById('canvasInput').value.trim();
+      
+      if(finalMsg === "") {
+        alert("The canvas is still blank...");
+        return;
+      }
+
+      // Temporarily save to localStorage
+      localStorage.setItem('final_canvas_msg', finalMsg);
+      
+      alert("Journey complete. Your thoughts have been launched! ✨");
+      window.location.href = "end.html"; 
+    }
+  </script>
+</body>
+</html>
