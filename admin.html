@@ -1,122 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Dashboard | Amirul</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --accent: #c3a6ff;
-      --bg: #07051a;
-      --card-bg: rgba(255, 255, 255, 0.03);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial Admin - View Wishes</title>
+    <style>
+        body { 
+            background: #020617; 
+            color: #e2e8f0; 
+            font-family: 'Segoe UI', sans-serif; 
+            padding: 40px;
+        }
+        h1 { color: #fff; text-align: center; margin-bottom: 40px; letter-spacing: 2px; }
+        
+        .table-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #1e293b;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-    body {
-      margin: 0; font-family: 'Outfit', sans-serif;
-      background-color: var(--bg); color: white; padding: 40px;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
 
-    .container { max-width: 1000px; margin: 0 auto; }
+        th {
+            background: #1e293b;
+            color: #6366f1;
+            padding: 15px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
 
-    .header {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;
-      margin-bottom: 40px;
-    }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #1e293b;
+            font-size: 0.95rem;
+            vertical-align: top;
+        }
 
-    h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin: 0; color: var(--accent); }
+        tr:hover { background: rgba(99, 102, 241, 0.05); }
 
-    .log-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
 
-    .log-card {
-      background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 30px; padding: 35px; position: relative;
-      animation: fadeInUp 0.8s ease forwards;
-    }
-
-    .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    
-    .name-tag {
-      background: var(--accent); color: #07051a;
-      padding: 5px 20px; border-radius: 20px; font-weight: 600;
-    }
-
-    .timestamp { font-size: 0.8rem; opacity: 0.5; }
-
-    .data-section {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-      margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .data-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
-    .data-box label { display: block; font-size: 0.7rem; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
-
-    .canvas-box {
-      margin-top: 20px; background: rgba(255,255,255,0.02);
-      padding: 20px; border-radius: 15px; border-left: 3px solid var(--accent);
-      white-space: pre-wrap; line-height: 1.6;
-    }
-
-    .empty-state { text-align: center; margin-top: 100px; opacity: 0.5; }
-
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+        .completed { background: #065f46; color: #34d399; }
+        .pending { background: #7c2d12; color: #fbbf24; }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="header">
-      <h1>Celestial Logs</h1>
-      <button onclick="logout()" style="background:none; border: 1px solid white; color:white; padding: 10px 20px; border-radius: 10px; cursor:pointer;">Logout</button>
+    <h1>Celestial Dashboard</h1>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Wish</th>
+                    <th>Mood</th>
+                    <th>Energy</th>
+                    <th>Message</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="resultsTable">
+                </tbody>
+        </table>
     </div>
 
-    <div id="logsWrapper" class="log-grid">
-      </div>
-  </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  <script type="module">
-    // Firebase connection will go here later
-    // For now, we simulate the display logic
-    
-    function loadLogs() {
-      const wrapper = document.getElementById('logsWrapper');
-      
-      // In a real scenario, this 'data' will come from Firebase
-      // This is a placeholder to show you how it will look:
-      const mockData = [
-        {
-          name: "Sample Visitor",
-          q1: "I saw a beautiful sunset.",
-          q2: "Time Travel ⏳",
-          q3: "Midnight City Drive 🏎️",
-          canvas: "This is where the long message from the canvas page will appear. It can be many sentences long...",
-          time: "1/1/2026, 12:00 PM"
-        }
-      ];
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFwrqG63P6fo-DNtansqfe73zpy_yJ1jA",
+            authDomain: "celestialcanvas-cac1e.firebaseapp.com",
+            databaseURL: "https://celestialcanvas-cac1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "celestialcanvas-cac1e",
+            storageBucket: "celestialcanvas-cac1e.firebasestorage.app",
+            messagingSenderId: "957600979058",
+            appId: "1:957600979058:web:0fd4ca1ede86ae19e40aeb"
+        };
 
-      wrapper.innerHTML = mockData.map(log => `
-        <div class="log-card">
-          <div class="user-info">
-            <span class="name-tag">${log.name}</span>
-            <span class="timestamp">${log.time}</span>
-          </div>
-          
-          <div class="data-section">
-            <div class="data-box"><label>Question 1 (Text)</label>${log.q1}</div>
-            <div class="data-box"><label>Question 2 (Option)</label>${log.q2}</div>
-            <div class="data-box"><label>Question 3 (Option)</label>${log.q3}</div>
-          </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const resultsRef = ref(db, 'results');
 
-          <div class="canvas-box">
-            <label style="font-size: 0.7rem; color: var(--accent); display:block; margin-bottom:10px;">FINAL CANVAS MESSAGE</label>
-            ${log.canvas}
-          </div>
-        </div>
-      `).join('');
-    }
+        // Listen for data in real-time
+        onValue(resultsRef, (snapshot) => {
+            const data = snapshot.val();
+            const tableBody = document.getElementById('resultsTable');
+            tableBody.innerHTML = ""; // Clear table first
 
-    window.logout = () => window.location.href = "index.html";
-    window.onload = loadLogs;
-  </script>
+            if (data) {
+                // Loop through each person in the database
+                Object.keys(data).forEach(key => {
+                    const user = data[key];
+                    const row = `
+                        <tr>
+                            <td><strong>${user.name || 'Anonymous'}</strong></td>
+                            <td>${user.wish || '-'}</td>
+                            <td>${user.mood || '-'}</td>
+                            <td>${user.energy || '-'}</td>
+                            <td>${user.canvasMessage || '-'}</td>
+                            <td>
+                                <span class="status-badge ${user.completed ? 'completed' : 'pending'}">
+                                    ${user.completed ? 'FINISHED' : 'IN PROGRESS'}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            } else {
+                tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No celestial data found yet.</td></tr>";
+            }
+        });
+    </script>
 </body>
 </html>

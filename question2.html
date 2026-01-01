@@ -1,100 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Question 2 | Celestial</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --accent: #c3a6ff;
-      --bg: #0f0c29;
-      --glass: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.15);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2 - The Mood</title>
+    <style>
+        body { 
+            background: #05070a; 
+            color: #e2e8f0; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    body {
-      margin: 0; font-family: 'Outfit', sans-serif;
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      color: white; height: 100vh; display: flex;
-      justify-content: center; align-items: center; overflow: hidden;
-    }
+        .card {
+            text-align: center;
+            padding: 40px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-    .stars {
-      position: absolute; width: 100%; height: 100%;
-      background: url('https://www.transparenttextures.com/patterns/stardust.png');
-      opacity: 0.3; z-index: 1; pointer-events: none;
-    }
+        h2 { margin-bottom: 30px; color: #fff; }
 
-    .card {
-      background: var(--glass); backdrop-filter: blur(20px);
-      padding: 40px; border-radius: 40px; border: 1px solid var(--glass-border);
-      text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-      width: 90%; max-width: 500px; z-index: 2;
-    }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
 
-    .question-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem; margin-bottom: 30px;
-      color: var(--accent);
-    }
+        .option-btn { 
+            padding: 20px; 
+            background: #1e293b; 
+            color: white; 
+            border: 1px solid #334155; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
 
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .option-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--glass-border);
-      padding: 20px 10px;
-      border-radius: 20px;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-      font-weight: 300;
-    }
-
-    .option-btn:hover {
-      background: var(--accent);
-      color: #0f0c29;
-      transform: translateY(-3px);
-    }
-
-    .option-btn.selected {
-      background: var(--accent);
-      color: #0f0c29;
-      border-color: white;
-    }
-  </style>
+        .option-btn:hover { 
+            background: #312e81; 
+            border-color: #6366f1;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+    </style>
 </head>
 <body>
 
-  <div class="stars"></div>
-
-  <div class="card">
-    <div class="question-title">If you could have any superpower for just one day, what would it be?</div>
-    
-    <div class="options-grid">
-      <div class="option-btn" onclick="selectOption('Flying')">Flying ☁️</div>
-      <div class="option-btn" onclick="selectOption('Time Travel')">Time Travel ⏳</div>
-      <div class="option-btn" onclick="selectOption('Invisibility')">Invisibility 👻</div>
-      <div class="option-btn" onclick="selectOption('Telepathy')">Telepathy 🧠</div>
+    <div class="card">
+        <h2>Choose the atmosphere of your star:</h2>
+        <div class="options-grid">
+            <button class="option-btn" onclick="saveMood('Calm Blue')">Calm Blue</button>
+            <button class="option-btn" onclick="saveMood('Fiery Red')">Fiery Red</button>
+            <button class="option-btn" onclick="saveMood('Mystic Purple')">Mystic Purple</button>
+            <button class="option-btn" onclick="saveMood('Golden Bright')">Golden Bright</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    function selectOption(choice) {
-      // Save choice to localStorage for now
-      localStorage.setItem('q2_answer', choice);
-      
-      // Short delay for visual feedback
-      setTimeout(() => {
-        window.location.href = "question3.html";
-      }, 300);
-    }
-  </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Your specific Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFwrqG63P6fo-DNtansqfe73zpy_yJ1jA",
+            authDomain: "celestialcanvas-cac1e.firebaseapp.com",
+            databaseURL: "https://celestialcanvas-cac1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "celestialcanvas-cac1e",
+            storageBucket: "celestialcanvas-cac1e.firebasestorage.app",
+            messagingSenderId: "957600979058",
+            appId: "1:957600979058:web:0fd4ca1ede86ae19e40aeb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const visitorName = localStorage.getItem('visitorName');
+
+        window.saveMood = function(moodChoice) {
+            if (!visitorName) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            // Find the existing record for this user
+            const userRef = ref(db, 'results/' + visitorName);
+
+            // 'update' adds the 'mood' field without deleting the 'wish' field!
+            update(userRef, {
+                mood: moodChoice
+            }).then(() => {
+                // Move to the third question
+                window.location.href = "question3.html";
+            }).catch((error) => {
+                console.error("Update Error:", error);
+                alert("Failed to save your choice.");
+            });
+        };
+    </script>
 </body>
 </html>

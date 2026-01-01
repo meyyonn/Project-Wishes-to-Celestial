@@ -1,44 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Question 3 | Celestial</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
-  <style>
-    /* ... (Keeping the same theme as Q2) ... */
-    :root { --accent: #c3a6ff; --bg: #0f0c29; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.15); }
-    body { margin: 0; font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: white; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-    .stars { position: absolute; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.3; z-index: 1; pointer-events: none; }
-    .card { background: var(--glass); backdrop-filter: blur(20px); padding: 40px; border-radius: 40px; border: 1px solid var(--glass-border); text-align: center; width: 90%; max-width: 500px; z-index: 2; }
-    .question-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 30px; color: var(--accent); }
-    .options-list { display: flex; flex-direction: column; gap: 15px; }
-    .option-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); padding: 18px; border-radius: 15px; color: white; cursor: pointer; transition: 0.3s; }
-    .option-btn:hover { background: var(--accent); color: #0f0c29; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 3 - The Energy</title>
+    <style>
+        body { 
+            background: #05070a; 
+            color: #e2e8f0; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            text-align: center;
+            padding: 40px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h2 { margin-bottom: 30px; color: #fff; }
+
+        .choice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .choice-btn { 
+            padding: 15px; 
+            background: #1e293b; 
+            color: white; 
+            border: 1px solid #475569; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .choice-btn:hover { 
+            background: #6366f1; 
+            border-color: #ffffff;
+            transform: translateX(5px);
+        }
+    </style>
 </head>
 <body>
 
-  <div class="stars"></div>
-
-  <div class="card">
-    <div class="question-title">Which of these sounds like the perfect vibe right now?</div>
-    
-    <div class="options-list">
-      <div class="option-btn" onclick="selectOption('Cozy Lo-fi Beats')">Cozy Lo-fi Beats ☕</div>
-      <div class="option-btn" onclick="selectOption('Midnight City Drive')">Midnight City Drive 🏎️</div>
-      <div class="option-btn" onclick="selectOption('Quiet Nature Sounds')">Quiet Nature Sounds 🌿</div>
-      <div class="option-btn" onclick="selectOption('Energetic Party')">Energetic Party 🕺</div>
+    <div class="card">
+        <h2>What kind of energy do you carry?</h2>
+        <div class="choice-list">
+            <button class="choice-btn" onclick="saveEnergy('Lone Wanderer')">The Lone Wanderer</button>
+            <button class="choice-btn" onclick="saveEnergy('Guide for Others')">The Guide for Others</button>
+            <button class="choice-btn" onclick="saveEnergy('Silent Observer')">The Silent Observer</button>
+            <button class="choice-btn" onclick="saveEnergy('Chaos & Creation')">Chaos & Creation</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    function selectOption(choice) {
-      localStorage.setItem('q3_answer', choice);
-      setTimeout(() => {
-        window.location.href = "canvas.html";
-      }, 300);
-    }
-  </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFwrqG63P6fo-DNtansqfe73zpy_yJ1jA",
+            authDomain: "celestialcanvas-cac1e.firebaseapp.com",
+            databaseURL: "https://celestialcanvas-cac1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "celestialcanvas-cac1e",
+            storageBucket: "celestialcanvas-cac1e.firebasestorage.app",
+            messagingSenderId: "957600979058",
+            appId: "1:957600979058:web:0fd4ca1ede86ae19e40aeb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const visitorName = localStorage.getItem('visitorName');
+
+        window.saveEnergy = function(energyType) {
+            if (!visitorName) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            const userRef = ref(db, 'results/' + visitorName);
+
+            update(userRef, {
+                energy: energyType
+            }).then(() => {
+                // Moving to the creative canvas page
+                window.location.href = "canvas.html";
+            }).catch((error) => {
+                console.error("Error:", error);
+            });
+        };
+    </script>
 </body>
 </html>

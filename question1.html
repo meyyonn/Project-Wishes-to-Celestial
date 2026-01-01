@@ -1,130 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Question 1 | Celestial</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --accent: #c3a6ff;
-      --bg: #0f0c29;
-      --glass: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.15);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 1 - Your Wish</title>
+    <style>
+        body { 
+            background: #05070a; 
+            color: #e2e8f0; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    body {
-      margin: 0; font-family: 'Outfit', sans-serif;
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      color: white; height: 100vh; display: flex;
-      justify-content: center; align-items: center; overflow: hidden;
-    }
+        .card {
+            text-align: center;
+            padding: 40px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-    .stars {
-      position: absolute; width: 100%; height: 100%;
-      background: url('https://www.transparenttextures.com/patterns/stardust.png');
-      opacity: 0.3; z-index: 1; pointer-events: none;
-    }
+        h2 { margin-bottom: 20px; color: #fff; }
 
-    .card {
-      background: var(--glass); backdrop-filter: blur(20px);
-      padding: 40px; border-radius: 40px; border: 1px solid var(--glass-border);
-      text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-      width: 90%; max-width: 500px; z-index: 2;
-    }
+        textarea { 
+            width: 100%; 
+            height: 120px; 
+            padding: 15px; 
+            border-radius: 12px; 
+            border: 1px solid #334155; 
+            background: #0f172a; 
+            color: white; 
+            font-size: 1rem;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+        }
+        
+        textarea:focus { border-color: #6366f1; }
 
-    .typewriter-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem; margin-bottom: 30px;
-      line-height: 1.4; min-height: 80px; color: var(--accent);
-    }
+        button { 
+            margin-top: 25px;
+            padding: 12px 40px; 
+            background: #6366f1; 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: 0.3s;
+        }
 
-    input {
-      width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--glass-border); border-radius: 15px;
-      color: white; font-family: 'Outfit', sans-serif;
-      font-size: 1.1rem; outline: none; transition: 0.3s;
-      box-sizing: border-box; opacity: 0; transform: translateY(10px);
-    }
-
-    input.visible { opacity: 1; transform: translateY(0); }
-
-    input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.05); }
-
-    button {
-      width: 100%; padding: 16px; border: none; border-radius: 15px;
-      background: var(--accent); color: #0f0c29; font-weight: 600;
-      font-size: 1.1rem; cursor: pointer; transition: 0.3s; margin-top: 20px;
-      opacity: 0; pointer-events: none;
-    }
-
-    button.visible { opacity: 1; pointer-events: auto; }
-
-    button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(195, 166, 255, 0.4); }
-  </style>
+        button:hover { background: #4f46e5; transform: scale(1.05); }
+    </style>
 </head>
 <body>
 
-  <div class="stars"></div>
+    <div class="card">
+        <h2 id="greeting">Hello...</h2>
+        <p>What is your deepest wish for the stars tonight?</p>
+        <textarea id="wishInput" placeholder="Write your wish here..."></textarea>
+        <br>
+        <button onclick="saveWish()">Next Step</button>
+    </div>
 
-  <div class="card">
-    <div class="typewriter-text" id="question"></div>
-    
-    <input type="text" id="answerInput" placeholder="Type your answer here..." autocomplete="off">
-    <button id="nextBtn" onclick="submitStep1()">Next Question</button>
-  </div>
+    <script type="module">
+        // 1. Import Firebase functions from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // 2. Your specific Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFwrqG63P6fo-DNtansqfe73zpy_yJ1jA",
+            authDomain: "celestialcanvas-cac1e.firebaseapp.com",
+            databaseURL: "https://celestialcanvas-cac1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "celestialcanvas-cac1e",
+            storageBucket: "celestialcanvas-cac1e.firebasestorage.app",
+            messagingSenderId: "957600979058",
+            appId: "1:957600979058:web:0fd4ca1ede86ae19e40aeb"
+        };
 
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-    };
+        // 3. Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        // 4. Retrieve the name from index.html
+        const visitorName = localStorage.getItem('visitorName');
+        
+        if (visitorName) {
+            document.getElementById('greeting').innerText = "Hello, " + visitorName;
+        } else {
+            // If someone skips the login, send them back
+            window.location.href = "index.html";
+        }
 
-    const questionStr = "First of all, what has been the best part of your week so far?";
-    const visitorName = localStorage.getItem('visitorName') || "Visitor";
-    const qEl = document.getElementById("question");
-    const inputEl = document.getElementById("answerInput");
-    const btnEl = document.getElementById("nextBtn");
+        // 5. Function to save to database
+        window.saveWish = function() {
+            const wishText = document.getElementById('wishInput').value;
 
-    let i = 0;
-    function typeWriter() {
-      if (i < questionStr.length) {
-        qEl.innerHTML += questionStr.charAt(i);
-        i++;
-        setTimeout(typeWriter, 50);
-      } else {
-        // Show input and button after typing finishes
-        inputEl.classList.add("visible");
-        btnEl.classList.add("visible");
-      }
-    }
+            if (wishText.trim() === "") {
+                alert("Please share your wish with the universe.");
+                return;
+            }
 
-    window.submitStep1 = async function() {
-      const answer = inputEl.value.trim();
-      if (answer === "") return alert("Please share something with the stars.");
+            // Reference to results/[Name]
+            const userRef = ref(db, 'results/' + visitorName);
 
-      try {
-        // We use 'update' with the visitorName as a key so all their answers stay together
-        const userRef = ref(db, 'results/' + visitorName);
-        await update(userRef, {
-          question1: answer,
-          timestamp: new Date().toLocaleString()
-        });
-
-        window.location.href = "question2.html";
-      } catch (e) {
-        alert("Connection error. Try again.");
-      }
-    }
-
-    window.onload = typeWriter;
-  </script>
+            // 'set' creates the user's data for the first time
+            set(userRef, {
+                name: visitorName,
+                wish: wishText,
+                timestamp: new Date().toLocaleString()
+            }).then(() => {
+                // Once saved, go to next page
+                window.location.href = "question2.html";
+            }).catch((error) => {
+                console.error("Firebase Error:", error);
+                alert("Database connection failed. Check your Firebase rules.");
+            });
+        };
+    </script>
 </body>
 </html>
